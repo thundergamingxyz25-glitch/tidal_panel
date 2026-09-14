@@ -1,0 +1,14 @@
+[Unit]
+Description=TidePanel Laravel queue worker
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/tidepanel/backend
+ExecStart=/usr/bin/php artisan queue:work redis --sleep=2 --tries=3 --timeout=90
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

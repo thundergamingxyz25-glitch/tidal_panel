@@ -1,0 +1,13 @@
+[Unit]
+Description=TidePanel local Docker node bridge
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/tidepanel/backend
+ExecStart=/usr/bin/php artisan tidepanel:node-health
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

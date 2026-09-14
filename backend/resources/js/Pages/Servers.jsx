@@ -1,0 +1,14 @@
+import { Head, Link } from '@inertiajs/react';
+import { ArrowRight, Cpu, HardDrive, MemoryStick, Plus, Server } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import AppLayout from '../Layouts/AppLayout';
+import { useAuth } from '../contexts/AuthContext';
+
+export default function Servers() {
+    const auth = useAuth();
+    const [servers, setServers] = useState([]);
+    const [error, setError] = useState('');
+    useEffect(() => { if (auth.ready && !auth.token) window.location.href = '/login'; if (auth.token) auth.api('/servers').then((body) => setServers(body.data)).catch((requestError) => setError(requestError.message)); }, [auth.ready, auth.token]);
+    return <AppLayout title="Servers"><Head title="Servers" /><div className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-sapphire-500">Client panel / access</p><h2 className="text-3xl font-semibold">Your servers</h2><p className="mt-2 text-sm leading-6 text-slate-400">Select a server to open its console, files, settings, and operations.</p></div><button className="button-primary"><Plus size={15} /> Request server</button></div>{error && <div className="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>}{servers.length === 0 ? <div className="panel p-10 text-center"><Server size={30} className="mx-auto text-sapphire-400" /><h3 className="mt-4 text-lg font-semibold">No servers assigned</h3><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">When an administrator grants you access, your servers will appear here.</p></div> : <div className="grid gap-5 lg:grid-cols-2">{servers.map((server) => <Link key={server.id} href={`/servers/${server.id}`} className="panel group p-5 transition hover:-translate-y-0.5 hover:border-sapphire-500/60"><div className="flex items-start justify-between"><div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-lg bg-sapphire-500/10 text-sapphire-400"><Server size={21} /></div><div><h3 className="font-semibold">{server.name}</h3><p className="mt-1 text-xs text-slate-500">{server.docker_image || 'Docker game server'}</p></div></div><ArrowRight size={18} className="text-slate-600 transition group-hover:translate-x-1 group-hover:text-sapphire-400" /></div><div className="mt-6 grid grid-cols-3 gap-3 border-t border-slate-800 pt-4 text-xs"><Metric icon={<Cpu size={14} />} label="CPU" value={`${server.cpu || 0}%`} /><Metric icon={<MemoryStick size={14} />} label="Memory" value={`${server.memory || 0} MB`} /><Metric icon={<HardDrive size={14} />} label="Disk" value={`${server.disk || 0} MB`} /></div></Link>)}</div>}</AppLayout>;
+}
+function Metric({ icon, label, value }) { return <div><span className="flex items-center gap-1 text-slate-500">{icon}{label}</span><b className="mt-1 block text-slate-200">{value}</b></div>; }
